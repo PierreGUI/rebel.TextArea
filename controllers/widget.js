@@ -1,5 +1,7 @@
 _.extend(this, {
 	value: null,
+	height: null,
+    length: 0,
 
 	construct: function(config) {
 		$.textarea.applyProperties(_.omit(config, 'id', '__parentSymbol', '__itemTemplate', '$model'));
@@ -18,9 +20,14 @@ _.extend(this, {
 		$.textarea.value = value;
 		$.value = value;
 
-		if(OS_IOS && $.textarea.value.length) {
-			$.label.hide();
-		}
+		sizeHandler();
+
+        if(OS_IOS && $.value.length > 0) {
+            $.label.hide();
+        }
+        else if($.value.length === 0) {
+            $.label.show();
+        }
 	},
 
 	focus: function() {
@@ -48,6 +55,21 @@ _.extend(this, {
 	}
 });
 
+// Handle the textArea growing/shrinking to match maxHeight parameter
+function sizeHandler() {
+    if(!$.height) {
+        $.height = $.textarea.height;
+    }
+    if(!$.length && $.textarea.maxHeight && $.textarea.rect.height >= $.textarea.maxHeight) {
+        $.textarea.setHeight($.textarea.maxHeight);
+        $.length = $.textarea.value.length;
+    }
+    else if($.length && $.length > $.value.length) {
+        $.textarea.setHeight($.height);
+        $.length = 0;
+    }
+}
+
 function onFocus(evt) {
 	$.trigger(evt.type, evt);
 }
@@ -58,14 +80,20 @@ function onBlur(evt) {
 
 function onChange(evt) {
 	$.value = this.value;
-	
-	if (OS_IOS){
-	    if (this.value.length > 0){
-	        $.label.hide();
-	    } else{
-	        $.label.show();
-	    }
-	}
+
+	sizeHandler();
+
+    if(OS_IOS && $.value.length > 0) {
+        $.label.hide();
+    }
+    else if($.value.length === 0) {
+        $.label.show();
+    }
 
 	$.trigger(evt.type, evt);
+}
+
+function onPostlayout(evt) {
+    sizeHandler();
+    $.trigger(evt.type, evt);
 }
