@@ -31,17 +31,9 @@ _.extend(this, {
 	},
 
 	setHintText: function(value) {
-		$.textarea.value = value;
-		$.value = value;
-
-		sizeHandler();
-
-        if(OS_IOS && $.value.length > 0) {
-            $.label.hide();
-        }
-        else if($.value.length === 0) {
-            $.label.show();
-        }
+		if(OS_IOS) {
+			$.label.text = value;
+		}
 	},
 
 	focus: function() {
